@@ -1,57 +1,60 @@
 from customllm import CustomLLM
-from embedder import CustomEmbedder
-import time
-
-from langchain.chains import LLMChain
+from customllm import default_llm
+from custom_embedders import CustomChromaEmbedder
+from custom_embedders import default_embedder
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 from langchain.prompts import PromptTemplate
-from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.document_loaders import TextLoader
-from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
-from langchain_community.vectorstores.chroma import Chroma
+from langchain_community.vectorstores import Chroma
 
-# load the document 
-loader = TextLoader("./state_of_the_union.txt")
-documents = loader.load()
+question = "What is the CHIPS Act?"
+template = """Instructions: Use only the following context to answer the question.
 
-# split it into chunks
-text_splitter = CharacterTextSplitter(chunk_size=1500, chunk_overlap=0)
-docs = text_splitter.split_documents(documents)
-idList = []
+Context: {context}
+Question: {question}
+"""
+
+# embedder = CustomChromaEmbedder()
+embedder = default_embedder
+db = Chroma(persist_directory="./chromadb", embedding_function=embedder)
+retriever = db.as_retriever(search_kwargs={"k": 1})
+prompt = PromptTemplate(template=template, input_variables=["context", "question"])
+
+# llm = CustomLLM()
+llm = default_llm
+# chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
+chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
+print(chain.invoke(question))
+print("#----------------------#")
 
 
-# create the open-source embedding function
-#embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+recipe_prompt = PromptTemplate.from_template(
+    """You are a chef. Given the title of a dish, it is your job to write a recipe for that dish.
 
-
-hf_embedder = HuggingFaceInferenceAPIEmbeddings(
-    api_key="", api_url="", model_name="zephyr-7b-beta"
+Name: {name}
+Chef: This is a recipe for the above dish:"""
 )
 
-custom_embedder = CustomEmbedder()
+review_prompt = PromptTemplate.from_template(
+    """You are a food critic for a magazine. Given the recipe of a dish, it is your job to write a review for that dish.
 
-# load it into Chroma
-db = Chroma.from_documents(docs, embedding=custom_embedder)
+Dish Synopsis:
+Review from a food critic of the above recipe:"""
+)
 
-time.sleep(30)
-
-# query it
-query = "Who was congratulated during the state of the union address of 2023?"
-docs = db.similarity_search(query)
-
-# print results
-print(docs[0].page_content)
-
-
-#question = "Who won the FIFA World Cup in the year 1994? "
-
-#template = """Question: {question}
-
-#Answer: Let's think step by step."""
-
-#prompt = PromptTemplate(template=template, input_variables=["question"])
-
-#llm = CustomLLM()
-#llm_chain = LLMChain(prompt=prompt, llm=llm)
-
-#print(llm_chain.invoke(question))
+# chain = (
+#     recipe_prompt
+#     |llm
+#     |StrOutputParser
+#     #{"recipe": recipe_prompt | llm | StrOutputParser()}
+#     #| review_prompt
+#     #| llm
+#     #| StrOutputParser()
+# )
+# print(chain.invoke({"name": "shrimp Gumbo"}))

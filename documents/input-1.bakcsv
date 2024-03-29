@@ -1,0 +1,9 @@
+Provider_ID, Provider_First_Name, Provider_Last_Name,Provider_Office_Location,Provider_Accepting_New_Patients,Provider_Accepts_Insurance_Plans,Specialty
+QAZ15,John,Hogan,'100 Medical Way, Suite 14B, Jacksonville, FL',Yes,'FBP-1, FBP-2','Internal Medicine'
+WSX28,Michael,Rubin,'200 Medical Way, Unit 1C, Tampa, FL',Yes,'FBP-1, FBP-2, FBP-3','Family Practice Primary Care Physician'
+EDC30,Jane,Smith,'300 Medical Way, STE 3, Atlanta, GA',No,'FBP-1, FBP-2',Orthopedics
+RFV41,Robert,Dekanski,'400 Medical Way, Unit 5C, New York, NY',Yes,'FBC-5, FBP-2',Endocrinologist
+TGB52,William,Weichart,'500 Medical Way, Suite M, North Brunswick, NJ',Yes,'FBP-1, FBP-2',Cardiologist
+YHN73,Nicholas,Dimeglio,'600 Medical Way, Unit 10Z, Baltimore, MD',No,'FBMED-1, FBMED-2',Allergist
+UJM91,Sarah,Green,'700 Medical Way, A, Boulder, CO',Yes,'FBP-19, FBP-20',Pediatrics
+IKM05,Larry,Marshall,'800 Medicay Way, STE 6, Dallas, TX',Yes,'FBE-6, FBE-10',Opthalmology
